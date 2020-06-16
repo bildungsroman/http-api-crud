@@ -24,12 +24,12 @@ Resources:
           TABLE_NAME: !Ref usersTable
           TABLE_ARN: !GetAtt usersTable.Arn
       Events:
-        HttpApiGETusersid:
+        UsersApiGETusersid:
           Type: HttpApi
           Properties:
             Path: /users/{id}
             Method: GET
-            ApiId: !Ref HttpApi
+            ApiId: !Ref UsersApi
             PayloadFormatVersion: '2.0'
             TimeoutInMillis: 29000
     Metadata:
@@ -56,12 +56,12 @@ Resources:
           TABLE_NAME: !Ref usersTable
           TABLE_ARN: !GetAtt usersTable.Arn
       Events:
-        HttpApiPUTusersid:
+        UsersApiPUTusersid:
           Type: HttpApi
           Properties:
             Path: /users/{id}
             Method: PUT
-            ApiId: !Ref HttpApi
+            ApiId: !Ref UsersApi
             PayloadFormatVersion: '2.0'
             TimeoutInMillis: 29000
     Metadata:
@@ -88,12 +88,12 @@ Resources:
           TABLE_NAME: !Ref usersTable
           TABLE_ARN: !GetAtt usersTable.Arn
       Events:
-        HttpApiPOSTusers:
+        UsersApiPOSTusers:
           Type: HttpApi
           Properties:
             Path: /users
             Method: POST
-            ApiId: !Ref HttpApi
+            ApiId: !Ref UsersApi
             PayloadFormatVersion: '2.0'
             TimeoutInMillis: 29000
     Metadata:
@@ -120,12 +120,12 @@ Resources:
           TABLE_NAME: !Ref usersTable
           TABLE_ARN: !GetAtt usersTable.Arn
       Events:
-        HttpApiDELETEusersid:
+        UsersApiDELETEusersid:
           Type: HttpApi
           Properties:
             Path: /users/{id}
             Method: DELETE
-            ApiId: !Ref HttpApi
+            ApiId: !Ref UsersApi
             PayloadFormatVersion: '2.0'
             TimeoutInMillis: 29000
     Metadata:
@@ -152,12 +152,12 @@ Resources:
           TABLE_NAME: !Ref usersTable
           TABLE_ARN: !GetAtt usersTable.Arn
       Events:
-        HttpApiGETusers:
+        UsersApiGETusers:
           Type: HttpApi
           Properties:
             Path: /users
             Method: GET
-            ApiId: !Ref HttpApi
+            ApiId: !Ref UsersApi
             PayloadFormatVersion: '2.0'
             TimeoutInMillis: 29000
     Metadata:
@@ -179,7 +179,20 @@ Resources:
       TableName: !Sub ${AWS::StackName}-usersTable
     Metadata:
       StackeryName: Users
-  HttpApi:
+  UserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      AdminCreateUserConfig:
+        AllowAdminCreateUserOnly: false
+      AliasAttributes:
+        - email
+        - preferred_username
+      UserPoolName: !Sub ${AWS::StackName}-UserPool
+  UserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      UserPoolId: !Ref UserPool
+  UsersApi:
     Type: AWS::Serverless::HttpApi
     Properties:
       DefinitionBody:
@@ -208,19 +221,6 @@ Resources:
             JwtConfiguration:
               audience:
                 - !Ref UserPoolClient
-  UserPool:
-    Type: AWS::Cognito::UserPool
-    Properties:
-      AdminCreateUserConfig:
-        AllowAdminCreateUserOnly: false
-      AliasAttributes:
-        - email
-        - preferred_username
-      UserPoolName: !Sub ${AWS::StackName}-UserPool
-  UserPoolClient:
-    Type: AWS::Cognito::UserPoolClient
-    Properties:
-      UserPoolId: !Ref UserPool
 Parameters:
   StackeryStackTagName:
     Type: String
